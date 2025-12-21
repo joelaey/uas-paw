@@ -26,33 +26,21 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy composer files first for caching
-COPY composer.json composer.lock ./
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# Copy package files
-COPY package.json package-lock.json ./
-
-# Install Node dependencies
-RUN npm install
-
-# Copy the rest of the application
+# Copy the entire application first
 COPY . .
 
-# Run composer scripts
-RUN composer run-script post-autoload-dump
-
-# Build frontend assets
-RUN npm run build
-
-# Create storage directories
-RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
-RUN chmod -R 775 storage bootstrap/cache
+# Create required directories with proper permissions
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+RUN chmod -R 775 bootstrap/cache storage
 
 # Create SQLite database
 RUN touch database/database.sqlite
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Install Node dependencies and build
+RUN npm install && npm run build
 
 # Expose port
 EXPOSE 8000

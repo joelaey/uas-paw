@@ -1,139 +1,140 @@
 @extends('admin.layout')
 
 @section('content')
-<div x-data="{ openModal: false }" class="space-y-6">
+    <div x-data="{ openModal: false }" class="space-y-6">
 
-    <!-- HEADER -->
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800">Detail Pengaduan</h1>
+        <!-- Back Button -->
+        <a href="{{ route('admin.pengaduan') }}" class="inline-flex items-center text-gray-600 hover:text-gray-900">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Kembali
+        </a>
 
-        <button
-            @click="openModal = true"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            Lihat Detail
-        </button>
-    </div>
+        <!-- HEADER -->
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-gray-800">Detail Pengaduan</h1>
+        </div>
 
-    <!-- TABEL RINGKAS -->
-    <div class="bg-white rounded-xl shadow overflow-hidden">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-100 text-gray-600">
-                <tr>
-                    <th class="px-6 py-4 text-left">Pelapor</th>
-                    <th class="px-6 py-4 text-left">Judul</th>
-                    <th class="px-6 py-4 text-left">Tanggal</th>
-                    <th class="px-6 py-4 text-left">Status</th>
-                    <th class="px-6 py-4 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                <tr>
-                    <td class="px-6 py-4">Budi Santoso</td>
-                    <td class="px-6 py-4">Jalan Rusak</td>
-                    <td class="px-6 py-4">12 Jun 2025</td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
-                            Diproses
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <button
-                            @click="openModal = true"
-                            class="text-blue-600 hover:underline">
-                            Detail
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- MODAL DETAIL -->
-    <div
-        x-show="openModal"
-        x-transition
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-        style="display: none;"
-    >
-        <div
-            @click.away="openModal = false"
-            class="bg-white w-full max-w-3xl rounded-2xl shadow-lg overflow-hidden"
-        >
-
-            <!-- MODAL HEADER -->
-            <div class="flex items-center justify-between px-6 py-4 border-b">
-                <h2 class="text-lg font-semibold text-gray-800">
-                    Detail Pengaduan
-                </h2>
-                <button @click="openModal = false">
-                    <!-- CLOSE ICON -->
-                    <svg class="w-6 h-6 text-gray-500 hover:text-gray-700"
-                        fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+        <!-- Success Message -->
+        @if(session('success'))
+            <div class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                {{ session('success') }}
             </div>
+        @endif
 
-            <!-- MODAL BODY -->
-            <div class="p-6 space-y-6 text-sm">
+        <!-- DETAIL CARD -->
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+            <div class="p-6 space-y-6">
+                <!-- Status -->
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-xl font-bold">{{ $aspiration->title }}</h2>
+                        <p class="text-gray-500">{{ $aspiration->created_at->format('d F Y, H:i') }}</p>
+                    </div>
+                    <div>
+                        @if($aspiration->status == 'baru')
+                            <span class="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700">Baru</span>
+                        @elseif($aspiration->status == 'diproses')
+                            <span class="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700">Diproses</span>
+                        @elseif($aspiration->status == 'selesai')
+                            <span class="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">Selesai</span>
+                        @else
+                            <span class="px-3 py-1 rounded-full text-sm bg-red-100 text-red-700">Ditolak</span>
+                        @endif
+                    </div>
+                </div>
 
                 <!-- INFORMASI PELAPOR -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <p class="text-gray-500">Nama Pelapor</p>
-                        <p class="font-medium">Budi Santoso</p>
+                        <p class="font-medium">{{ $aspiration->user->name }}</p>
                     </div>
                     <div>
                         <p class="text-gray-500">Email</p>
-                        <p class="font-medium">budi@email.com</p>
+                        <p class="font-medium">{{ $aspiration->user->email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">NIK</p>
+                        <p class="font-medium">{{ $aspiration->user->nik }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">No. HP</p>
+                        <p class="font-medium">{{ $aspiration->user->phone }}</p>
                     </div>
                 </div>
 
-                <!-- JUDUL -->
+                <!-- LOKASI -->
                 <div>
-                    <p class="text-gray-500">Judul Pengaduan</p>
-                    <p class="font-semibold text-gray-800">
-                        Jalan Rusak Parah di Depan Sekolah
-                    </p>
+                    <p class="text-gray-500">Lokasi</p>
+                    <p class="font-medium">{{ $aspiration->location }}</p>
                 </div>
 
                 <!-- ISI -->
                 <div>
                     <p class="text-gray-500 mb-1">Isi Pengaduan</p>
                     <div class="p-4 bg-gray-50 rounded-lg leading-relaxed">
-                        Jalan berlubang dan sangat membahayakan pengendara,
-                        terutama pada malam hari.
+                        {{ $aspiration->content }}
                     </div>
                 </div>
 
-                <!-- STATUS -->
-                <div class="flex items-center gap-3">
-                    <span class="text-gray-500">Status:</span>
-                    <span class="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
-                        Diproses
-                    </span>
-                </div>
+                <!-- Image -->
+                @if($aspiration->image)
+                    <div>
+                        <p class="text-gray-500 mb-2">Foto Lampiran</p>
+                        <img src="{{ asset('storage/' . $aspiration->image) }}" alt="Lampiran" class="rounded-lg max-w-md">
+                    </div>
+                @endif
 
+                <!-- Previous Response -->
+                @if($aspiration->admin_response)
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <p class="text-gray-500 mb-1">Respon Sebelumnya</p>
+                        <p class="text-gray-700">{{ $aspiration->admin_response }}</p>
+                        @if($aspiration->responder)
+                            <p class="text-sm text-gray-500 mt-2">
+                                Oleh {{ $aspiration->responder->name }} - {{ $aspiration->responded_at->format('d M Y, H:i') }}
+                            </p>
+                        @endif
+                    </div>
+                @endif
             </div>
 
-            <!-- MODAL FOOTER -->
-            <div class="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+            <!-- RESPONSE FORM -->
+            <div class="px-6 py-4 border-t bg-gray-50">
+                <h3 class="font-semibold mb-4">Kirim Respon</h3>
+                <form method="POST" action="{{ route('admin.pengaduan.respond', $aspiration->id) }}">
+                    @csrf
 
-                <button
-                    class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition">
-                    Tolak
-                </button>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-2">Respon Admin</label>
+                        <textarea name="admin_response" rows="4"
+                            class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            placeholder="Tulis respon untuk pengaduan ini..."
+                            required>{{ old('admin_response') }}</textarea>
+                    </div>
 
-                <button
-                    class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition">
-                    Selesaikan
-                </button>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-2">Ubah Status</label>
+                        <select name="status"
+                            class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            required>
+                            <option value="diproses" {{ $aspiration->status == 'diproses' ? 'selected' : '' }}>Diproses
+                            </option>
+                            <option value="selesai" {{ $aspiration->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                            <option value="ditolak" {{ $aspiration->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        </select>
+                    </div>
 
+                    <div class="flex gap-3">
+                        <button type="submit"
+                            class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                            Kirim Respon
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
-</div>
 @endsection

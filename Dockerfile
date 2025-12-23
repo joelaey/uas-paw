@@ -6,6 +6,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Create public directory structure
+RUN mkdir -p public/build
+
 # Copy source files needed for build
 COPY resources ./resources
 COPY vite.config.js ./
@@ -14,6 +17,9 @@ COPY tailwind.config.js ./
 
 # Build assets
 RUN npm run build
+
+# Debug - show what was built
+RUN echo "=== Build Output ===" && ls -la public/ && ls -la public/build/ || true
 
 # ======== PHP Stage ========
 FROM php:8.2-cli
@@ -47,6 +53,9 @@ COPY . .
 
 # Copy built assets from node-builder stage
 COPY --from=node-builder /app/public/build ./public/build
+
+# Debug - verify assets copied
+RUN echo "=== Verifying build assets ===" && ls -la public/build/ && cat public/build/.vite/manifest.json || echo "No manifest found"
 
 # Create required directories with proper permissions
 RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs

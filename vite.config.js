@@ -6,6 +6,16 @@ export default defineConfig({
         host: 'localhost',
         port: 5173,
     },
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        rollupOptions: {
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+            ],
+        },
+    },
     plugins: [
         laravel({
             input: [

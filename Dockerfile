@@ -33,28 +33,24 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY package*.json ./
-RUN npm install
-
-# Copy composer files
-COPY composer.json composer.lock ./
-
-# Copy the rest of the application
+# Copy all application files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
-
-# Build frontend assets
-RUN npm run build
-
 # Create required directories with proper permissions
-RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs public/build
 RUN chmod -R 777 bootstrap/cache storage
 
 # Create SQLite database
 RUN touch database/database.sqlite && chmod 777 database/database.sqlite
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Install Node dependencies
+RUN npm install
+
+# Build frontend assets and verify
+RUN npm run build && ls -la public/build/
 
 # Set default environment variables
 ENV APP_ENV=production
@@ -65,4 +61,4 @@ ENV DB_CONNECTION=sqlite
 EXPOSE 8000
 
 # Start script
-CMD ["sh", "-c", "php artisan key:generate --force --no-interaction 2>/dev/null || true && php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+CMD ["sh", "-c", "php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]

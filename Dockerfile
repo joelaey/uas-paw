@@ -44,6 +44,9 @@ RUN ls -la public/build/ && cat public/build/manifest.json
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 ENV DB_CONNECTION=sqlite
+ENV SESSION_DRIVER=file
+ENV SESSION_SECURE_COOKIE=true
+ENV SESSION_SAME_SITE=lax
 
 # Expose port
 EXPOSE 8000

@@ -1,30 +1,6 @@
-FROM node:18-alpine AS node-builder
-
-WORKDIR /app
-
-# Copy package files and install
-COPY package*.json ./
-RUN npm install
-
-# Create public directory structure
-RUN mkdir -p public/build
-
-# Copy source files needed for build
-COPY resources ./resources
-COPY vite.config.js ./
-COPY postcss.config.js ./
-COPY tailwind.config.js ./
-
-# Build assets
-RUN npm run build
-
-# Debug - show what was built
-RUN echo "=== Build Output ===" && ls -la public/ && ls -la public/build/ || true
-
-# ======== PHP Stage ========
 FROM php:8.2-cli
 
-# Install system dependencies
+# Install system dependencies (NO Node.js needed - build assets are pre-committed)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -48,14 +24,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy application files
+# Copy the entire application (including pre-built assets in public/build/)
 COPY . .
-
-# Copy built assets from node-builder stage
-COPY --from=node-builder /app/public/build ./public/build
-
-# Debug - verify assets copied
-RUN echo "=== Verifying build assets ===" && ls -la public/build/ && cat public/build/.vite/manifest.json || echo "No manifest found"
 
 # Create required directories with proper permissions
 RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
@@ -66,6 +36,9 @@ RUN touch database/database.sqlite && chmod 777 database/database.sqlite
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Verify build assets exist
+RUN ls -la public/build/ && cat public/build/.vite/manifest.json
 
 # Set default environment variables
 ENV APP_ENV=production

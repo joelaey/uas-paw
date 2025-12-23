@@ -38,7 +38,7 @@ RUN touch database/database.sqlite && chmod 777 database/database.sqlite
 RUN composer install --no-dev --optimize-autoloader
 
 # Verify build assets exist
-RUN ls -la public/build/ && cat public/build/.vite/manifest.json
+RUN ls -la public/build/ && cat public/build/manifest.json
 
 # Set default environment variables
 ENV APP_ENV=production
